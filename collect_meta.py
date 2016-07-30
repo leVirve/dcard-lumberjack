@@ -1,5 +1,5 @@
 import time
-from multiprocessing import Pool
+import concurrent.futures
 
 from pymongo import MongoClient
 
@@ -11,7 +11,7 @@ db = client['dcard-metas']
 
 
 def store_metas(metas, forum):
-    bulk = db[forum].initialize_ordered_bulk_op()
+    bulk = db[forum].initialize_unordered_bulk_op()
     [bulk.find({'id': meta['id']}).upsert().replace_one(meta) for meta in metas]
     result = bulk.execute()
 
@@ -26,20 +26,18 @@ def collect_metas(name):
             num=bound,
             callback=lambda metas, forum=name: store_metas(metas, forum)
         )
-    logger.info('Spent {:.05} sec for [{}]'.format(time.time() - s, name))
+    logger.info('<{}> used {:.05} sec.'.format(name, time.time() - s))
 
 
 def main():
-    collect_metas('freshman')
-    # dcard = Dcard()
-    # forums = dcard.forums.get(no_school=True)
+    forums = Dcard.forums.get(no_school=True)
+    forums = [forum['alias'] for forum in forums]
 
-    # thread_pool = Pool(processes=8)
-    # result = thread_pool.map_async(collect_metas, [forum['alias'] for forum in forums])
-    # result.get()
+    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
+        executor.map(collect_metas, forums)
 
 
 if __name__ == '__main__':
     s = time.time()
     main()
-    logger.info('Total Work: {:.05} sec'.format(time.time() - s))
+    print('Total Work: {:.05} sec'.format(time.time() - s))
