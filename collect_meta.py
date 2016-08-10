@@ -1,94 +1,45 @@
-'''
-Strategy:
-
-    -* replace all metadata for all forums
-    -* replace only recent metadata for all forums
-    -* replace only need update metadata for all forums
-
-'''
-
 import time
-import concurrent.futures
+import logging
+import datetime
 
-from pymongo import MongoClient
-
-from dcard import Dcard, logger
-
-
-client = MongoClient()
-db = client['dcard-metas']
-
-dcard = Dcard()
+from dcard import Dcard
+from lumberjack.crawler import crawl
+from lumberjack.strategy import DBStrategy
 
 
-def brand_new_crawl(name):
+logger = logging.getLogger('lumberjack')
 
-    def store_metas(metas, forum):
-        result = db[forum].insert_many(metas)
-        logger.info('[database] #Forum {}: {} items'.format(forum, len(result)))
+# Setup Handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console = logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+console.setFormatter(formatter)
 
-    s = time.time()
-    dcard.forums(name).get_metas(
-            num=Dcard.forums.infinite_page,
-            callback=lambda metas, forum=name: store_metas(metas, forum)
-        )
-    logger.info('<{}> used {:.05} sec.'.format(name, time.time() - s))
-
-
-def only_recent_crawl(name, boundary_date):
-
-    def store_metas(metas, forum):
-        bulk = db[forum].initialize_unordered_bulk_op()
-        [
-            bulk.find({'id': meta['id']}).upsert().replace_one(meta)
-            for meta in metas
-        ]
-        result = bulk.execute()
-        del result['upserted']
-        logger.info('[database] #Forum {}: {}'.format(forum, result))
-
-    s = time.time()
-    metas = dcard.forums(name).get_metas(
-            num=dcard.forums.infinite_page,
-            timebound=boundary_date.isoformat(),
-            callback=lambda metas, forum=name: store_metas(metas, forum)
-        )
-    logger.info('<{}> used {:.05} sec.'.format(name, time.time() - s))
-
-
-def update_new_crawl(name, boundary_num=None, boundary_date=None):
-
-    def store_metas(metas, forum):
-        bulk = db[forum].initialize_unordered_bulk_op()
-        [
-            bulk.find({
-                'id': meta['id'],
-                'updatedAt': {'$gt': meta['updatedAt']}
-            }).upsert().replace_one(meta)
-            for meta in metas
-        ]
-        result = bulk.execute()
-        del result['upserted']
-        logger.info('[database] #Forum {}: {}'.format(forum, result))
-
-    s = time.time()
-    metas = dcard.forums(name).get_metas(
-            num=dcard.forums.infinite_page if not boundary_num else boundary_num,
-            timebound=boundary_date.isoformat() if boundary_date else '',
-            callback=lambda metas, forum=name: store_metas(metas, forum)
-        )
-    logger.info('<{}> used {:.05} sec.'.format(name, time.time() - s))
+# Setup Logger
+logger.addHandler(console)
+logger.setLevel(logging.DEBUG)
 
 
 def main():
+    dcard = Dcard()
     forums = dcard.forums.get(no_school=True)
     forums = [forum['alias'] for forum in forums]
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=4) as executor:
-        executor.map(brand_new_crawl, forums)
+    boundary_date = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+
+    forum = forums[0]
+
+    # brand new crawl
+    crawl(forum, callback=DBStrategy.insert_metas)
+
+    # crawl recently
+    crawl(forum, boundary_date=boundary_date, callback=DBStrategy.upsert_metas)
+
+    # crawl before
+    crawl(forum, before=54051, callback=DBStrategy.upsert_metas)
 
 
 if __name__ == '__main__':
     s = time.time()
     main()
-    print('Total Work: {:.05} sec'.format(time.time() - s))
+    logger.info('Total Work: {:.05} sec'.format(time.time() - s))
