@@ -1,23 +1,46 @@
 import time
 import logging
+import datetime
 from multiprocessing.dummy import Pool
 
 from dcard import Dcard
+from lumberjack.collect_meta import collect
 
 
 logger = logging.getLogger('lumberjack')
 
+# Setup Handler
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+console = logging.StreamHandler()
+console.setLevel(logging.DEBUG)
+console.setFormatter(formatter)
+
+# Setup Logger
+logger.addHandler(console)
+logger.setLevel(logging.DEBUG)
+
+
+dcard = Dcard()
+forums = dcard.forums.get(no_school=True)
+
+
+def brute(forums):
+    with Pool(processes=2) as pool:
+        result = pool.map(collect, forums)
+    return result
+
+
+def get_posts_from_funny_in_recent_4_hours():
+    time_limitation = datetime.datetime.utcnow() - datetime.timedelta(hours=4)
+    bundle = (
+        'funny',
+        {'boundary_date': time_limitation}
+    )
+    return collect(bundle)
+
 
 if __name__ == '__main__':
     s = time.time()
-
-    dcard = Dcard()
-    forums = dcard.forums.get(no_school=True)
-
-    thread_pool = Pool(processes=2)
-    result = thread_pool.map_async(
-        '''collect_metas''',
-        [forum['alias'] for forum in forums])
-    result.get()
-
+    result = get_posts_from_funny_in_recent_4_hours()
+    print(result)
     logger.info('Total Work: {:.05} sec'.format(time.time() - s))
