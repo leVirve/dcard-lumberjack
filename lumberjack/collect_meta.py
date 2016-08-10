@@ -26,7 +26,7 @@ def collecter(
             callback=lambda metas, name=name: callback(metas, name)
         )
 
-    logger.debug('<%s> used %.05f sec.', name, time.time() - s)
+    logger.info('<%s> used %.05f sec.', name, time.time() - s)
     return result
 
 
