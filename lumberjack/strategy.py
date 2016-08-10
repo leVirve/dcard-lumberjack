@@ -11,7 +11,7 @@ class DBStrategy:
     db = client['dcard-metas']
 
     @staticmethod
-    def insert_metas(metas, collect, forum):
+    def insert_metas(metas, forum):
         collect = DBStrategy.db[forum]
         result = collect.insert_many(metas)
         logger.info('[db] #Forum %s: %d', forum, len(result.inserted_ids))
