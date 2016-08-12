@@ -93,3 +93,6 @@ data/
 *.log
 *.bat
 *.sh
+
+# Datastore Stuff
+*.rdb
