@@ -1,7 +1,8 @@
 # dcard-lumberjack
 **Lumberjack in Dcard !** :evergreen_tree:
 
-This will be a project aims to dumping the resources on `Dcard`.
+This aims to dumping the resources on `Dcard`. 
+*The project is under active development.*
 
 ## Requirements
 
@@ -11,12 +12,12 @@ This will be a project aims to dumping the resources on `Dcard`.
 
 ## Usage
 
-- Run `MongoDB` and `redis-server`
-- Run task in `spider.py`
+Use `MongoDB` as data storage layer, and `Redis` acts as `broker` and `result-backend` for `Celery`.
+
+- Run `MongoDB` and `redis-server` through `supervisor.py`. And define your own tasks in `spider.py`.
 
 ```bash
 $ python supervisor.py
-
 $ python spider.py
 ```
 
@@ -37,7 +38,3 @@ dumping the posts on <$forum>.....
 
 Summary: 1500 posts in 60 sec.
 ```
-
-*The project is under active development. Comming soon*
-
-Use `MongoDB` as data storage layer, and `Redis` acts as `broker` and `result-backend` for `Celery`.

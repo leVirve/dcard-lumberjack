@@ -29,7 +29,7 @@ def get_all_metas(forum_name):
 
 
 def update_metas_recently(forum_name):
-    time_limitation = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    time_limitation = datetime.datetime.utcnow() - datetime.timedelta(weeks=1)
     bundle = (
         forum_name,
         {'timebound': time_limitation.isoformat()}
