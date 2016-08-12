@@ -28,22 +28,25 @@ def get_all_metas(forum_name):
     return collect_all_metas_task.delay(forum_name)
 
 
-def get_metas_in_one_weeks(forum_name):
+def update_metas_in_one_weeks(forum_name):
     ''' Run this every day, and metas will upsert into database. '''
     time_limitation = datetime.datetime.utcnow() - datetime.timedelta(weeks=1)
     bundle = (
         forum_name,
-        {'boundary_date': time_limitation}
+        {'timebound': time_limitation.isoformat()}
     )
     return collect_meta_task.delay(bundle)
 
 
 def get_new_posts(forum_name):
-    collect_posts_task.delay(forum_name)
+    return collect_posts_task.delay(forum_name)
 
 
 if __name__ == '__main__':
     forum = 'pokemon'
 
-    get_metas_in_one_weeks(forum)
-    get_new_posts(forum)
+    result = update_metas_in_one_weeks(forum)
+    print(result.get())
+
+    r2 = get_new_posts(forum)
+    print(r2)

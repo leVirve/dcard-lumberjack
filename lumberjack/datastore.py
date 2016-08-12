@@ -19,17 +19,6 @@ class Datastore:
         return result
 
     @classmethod
-    def upsert_metas(cls, metas, forum):
-        bulk = cls.meta_db[forum].initialize_unordered_bulk_op()
-        for meta in metas:
-            bulk.find({'id': meta['id']}).upsert().replace_one(meta)
-        result = bulk.execute() if len(metas) else None
-        if result:
-            del result['upserted']
-        logger.info('[db] #Forum %s: %s', forum, result)
-        return result
-
-    @classmethod
     def upsert_metas_if_newer(cls, metas, forum):
         bulk = cls.meta_db[forum].initialize_unordered_bulk_op()
         for meta in metas:
