@@ -3,8 +3,6 @@ import logging
 
 from dcard import Dcard
 
-from lumberjack.strategy import DBStrategy
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +28,6 @@ def collecter(
     return result
 
 
-def collect_all(forum):
-    return collecter(forum, callback=DBStrategy.insert_metas)
-
-
-def collect(bundle):
-    forum, param = bundle
-    return collecter(forum, **param, callback=DBStrategy.upsert_metas)
+def cposts(metas):
+    dcard = Dcard()
+    return dcard.posts(metas).get()
