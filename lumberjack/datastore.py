@@ -45,4 +45,4 @@ class Datastore:
 
     @classmethod
     def save(cls, post):
-        cls.post_db.posts.insert(post)
+        cls.post_db.posts.update_one({'id': post['id']}, post, upsert=True)
