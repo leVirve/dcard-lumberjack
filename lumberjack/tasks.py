@@ -1,18 +1,18 @@
 from lumberjack.celery import app
-from lumberjack.collector import collecte_metas, collect_posts
+from lumberjack.collector import collect_metas, collect_posts
 from lumberjack.strategy import Datastore
 
 
 @app.task
 def collect_meta_task(bundle):
     forum, param = bundle
-    return collecte_metas(
+    return collect_metas(
         forum, **param, callback=Datastore.upsert_metas_if_newer)
 
 
 @app.task
 def collect_all_metas_task(forum):
-    return collecte_metas(
+    return collect_metas(
         forum, callback=Datastore.insert_metas)
 
 
