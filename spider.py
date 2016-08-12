@@ -28,8 +28,8 @@ def get_all_metas(forum_name):
 
 
 def get_metas_in_one_weeks(forum_name):
-    ''' Run this every week, and metas will upsert into database. '''
-    time_limitation = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+    ''' Run this every day, and metas will upsert into database. '''
+    time_limitation = datetime.datetime.utcnow() - datetime.timedelta(weeks=1)
     bundle = (
         forum_name,
         {'boundary_date': time_limitation}
