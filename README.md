@@ -13,3 +13,31 @@ Summary: 1500 posts in 60 sec.
 ```
 
 *The project is under active development. Comming soon*
+
+Use `MongoDB` as data storage layer, and `Redis` acts as `broker` and `result-backend` for `Celery`.
+
+## Requirements
+
+- Python 3
+- MongoDB
+- Redis
+
+## Usage
+
+- Run `MongoDB` and `redis-server`
+
+```
+$ python supervisor.py
+```
+
+- Run task in `spider.py`
+
+```
+$ python spider.py
+```
+
+- Run celery worker
+
+```
+$ celery -A lumberjack worker [--pool=solo]
+```
