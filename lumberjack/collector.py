@@ -7,7 +7,7 @@ from dcard import Dcard
 logger = logging.getLogger(__name__)
 
 
-def collecter(
+def collect_metas(
         name,
         boundary_num=None,
         before_id=None,
@@ -28,6 +28,6 @@ def collecter(
     return result
 
 
-def cposts(metas):
+def collect_posts(metas):
     dcard = Dcard()
     return dcard.posts(metas).get()

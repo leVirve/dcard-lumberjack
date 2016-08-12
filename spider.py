@@ -2,7 +2,8 @@ import logging
 import datetime
 
 from dcard import Dcard
-from lumberjack.tasks import collect, collect_all, collect_posts
+from lumberjack.tasks import (
+    collect_meta_task, collect_all_metas_task, collect_posts_task)
 
 
 logger = logging.getLogger('lumberjack')
@@ -24,7 +25,7 @@ forums = dcard.forums.get(no_school=True)
 
 def get_all_metas(forum_name):
     ''' Run this once, and all metas will insert into database. '''
-    return collect_all.delay(forum_name)
+    return collect_all_metas_task.delay(forum_name)
 
 
 def get_metas_in_one_weeks(forum_name):
@@ -34,9 +35,15 @@ def get_metas_in_one_weeks(forum_name):
         forum_name,
         {'boundary_date': time_limitation}
     )
-    return collect.delay(bundle)
+    return collect_meta_task.delay(bundle)
+
+
+def get_new_posts(forum_name):
+    collect_posts_task.delay(forum_name)
 
 
 if __name__ == '__main__':
-    get_metas_in_one_weeks('pokemon')
-    collect_posts('pokemon')
+    forum = 'pokemon'
+
+    get_metas_in_one_weeks(forum)
+    get_new_posts(forum)

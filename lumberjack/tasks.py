@@ -1,26 +1,28 @@
 from lumberjack.celery import app
-from lumberjack.collect_meta import collecter, cposts
-from lumberjack.strategy import DBStrategy, Datastore
+from lumberjack.collector import collecte_metas, collect_posts
+from lumberjack.strategy import Datastore
 
 
 @app.task
-def collect(bundle):
+def collect_meta_task(bundle):
     forum, param = bundle
-    return collecter(forum, **param, callback=DBStrategy.upsert_metas_if_newer)
+    return collecte_metas(
+        forum, **param, callback=Datastore.upsert_metas_if_newer)
 
 
 @app.task
-def collect_all(forum):
-    return collecter(forum, callback=DBStrategy.insert_metas)
+def collect_all_metas_task(forum):
+    return collecte_metas(
+        forum, callback=Datastore.insert_metas)
 
 
 @app.task
-def collect_posts(forum):
+def collect_posts_task(forum):
     db = Datastore()
     tasks = [
         {'_id': m['_id'], 'id': m['id'], 'commentCount': m['commentCount']}
-        for m in DBStrategy.find_pending_metas(forum)
+        for m in db.find_pending_metas(forum)
     ]
-    for task, post in zip(tasks, cposts(tasks)):
-        DBStrategy.change_pending_meta(forum, task)
+    for task, post in zip(tasks, collect_posts(tasks)):
+        db.finish_pending_meta(forum, task)
         db.save(post)
