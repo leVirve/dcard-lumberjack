@@ -33,6 +33,8 @@ def collect_posts_task(forum):
         {'_id': m['_id'], 'id': m['id'], 'commentCount': m['commentCount']}
         for m in db.find_pending_metas(forum)
     ]
+    logger.info('[task.collect_posts] %d posts need update.', len(tasks))
+
     for task, post in zip(tasks, dcard.posts(tasks).get()):
         try:
             db.save(post)
