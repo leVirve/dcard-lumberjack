@@ -12,23 +12,22 @@ This aims to dumping the resources on `Dcard`.
 
 ## Usage
 
-Use `MongoDB` as data storage layer, and `Redis` acts as `broker` and `result-backend` for `Celery`.
+This project uses `MongoDB` as data storage layer, and `Redis` acts as `broker` and `result-backend` for `Celery`.
+Make sure they are on for services first.
 
-- Run `MongoDB` and `redis-server` through `supervisor.py`. And define your own tasks in `spider.py`.
+- Define all your own tasks in `spider.py`.
 
 ```bash
-$ python supervisor.py
 $ python spider.py
 ```
 
-
-- (Optional) You can run more celery workers in this way, `--pool=solo` is needed for `Windows`.
+- Start celery workers in this way, `--pool=solo` is needed for `Windows`.
 
 ```bash
 $ celery -A lumberjack worker [--pool=solo]
 ```
 
-- TBD
+------
 
 ```bash
 > dcard-lbj [forum_name] [strategies_name]
