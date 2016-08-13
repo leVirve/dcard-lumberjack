@@ -1,20 +1,9 @@
 import logging
 
-from celery import Celery
-
 from dcard import Dcard
+from lumberjack.celery import app
 from lumberjack.datastore import Datastore
 
-
-BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/1'
-
-app = Celery(
-    'lumberjack',
-    broker=BROKER_URL,
-    backend=CELERY_RESULT_BACKEND,
-    include=['lumberjack.tasks']
-)
 
 logger = logging.getLogger(__name__)
 dcard = Dcard()
