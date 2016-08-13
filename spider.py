@@ -26,7 +26,7 @@ def get_all_metas(forum_name):
 
 
 def update_metas_recently(forum_name):
-    time_limitation = datetime.datetime.utcnow() - datetime.timedelta(weeks=1)
+    time_limitation = datetime.datetime.utcnow() - datetime.timedelta(days=30)
     bundle = (
         forum_name,
         {'timebound': time_limitation.isoformat()}
@@ -41,8 +41,8 @@ def get_new_posts(forum_name):
 if __name__ == '__main__':
     forum = 'pokemon'
 
-    # result = update_metas_recently(forum)
-    # print(result.get())
+    result = update_metas_recently(forum)
+    print(result.get())
 
     r2 = get_new_posts(forum)
     print(r2)

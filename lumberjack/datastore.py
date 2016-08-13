@@ -20,17 +20,29 @@ class Datastore:
 
     @classmethod
     def upsert_metas_if_newer(cls, metas, forum):
+        if len(metas) == 0:
+            return
+
+        collect = cls.meta_db[forum]
+        metas = [
+            meta
+            for meta in metas
+            if not collect.find_one({
+                'id': meta['id'],
+                'updatedAt': {'$lte': meta['updatedAt']}
+            })
+        ]
+        logger.info('<%s> collect %d metas need update.', forum, len(metas))
+
         bulk = cls.meta_db[forum].initialize_unordered_bulk_op()
         for meta in metas:
             meta['pending'] = True
-            bulk.find({
-                'id': meta['id'],
-                'updatedAt': {'$gt': meta['updatedAt']}
-            }).upsert().replace_one(meta)
-        result = bulk.execute() if len(metas) else None
-        if result:
-            del result['upserted']
-        logger.info('[db] #Forum %s: %s', forum, result)
+            bulk.find({'id': meta['id']}).upsert().update_one({'$set': meta})
+        result = bulk.execute()
+
+        del result['upserted']
+
+        logger.info('[db] <%s> update %d items: %s', forum, len(metas), result)
         return result
 
     @classmethod
@@ -45,4 +57,7 @@ class Datastore:
 
     @classmethod
     def save(cls, post):
-        cls.post_db.posts.update_one({'id': post['id']}, {'$set': post}, upsert=True)
+        cls.post_db.posts.update_one(
+            {'id': post['id']},
+            {'$set': post},
+            upsert=True)

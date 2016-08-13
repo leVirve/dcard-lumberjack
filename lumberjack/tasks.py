@@ -42,3 +42,6 @@ def collect_posts_task(forum):
         except Exception as e:
             logger.error('when fectch and save post', exc_info=True)
             logger.error(e, task, post)
+
+    logger.info('[task.collect_posts] %d updated.',
+                len(tasks) - db.find_pending_metas(forum).count())
