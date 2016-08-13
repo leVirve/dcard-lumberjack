@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class Datastore:
 
-    client = MongoClient(connect=False)
+    client = MongoClient()
     meta_db = client['dcard-metas']
     post_db = client['dcard-posts']
 
@@ -45,4 +45,4 @@ class Datastore:
 
     @classmethod
     def save(cls, post):
-        cls.post_db.posts.update_one({'id': post['id']}, post, upsert=True)
+        cls.post_db.posts.update_one({'id': post['id']}, {'$set': post}, upsert=True)

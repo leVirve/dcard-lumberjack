@@ -34,5 +34,8 @@ def collect_posts_task(forum):
         for m in db.find_pending_metas(forum)
     ]
     for task, post in zip(tasks, dcard.posts(tasks).get()):
-        db.finish_pending_meta(forum, task)
-        db.save(post)
+        try:
+            db.save(post)
+            db.finish_pending_meta(forum, task)
+        except Exception as e:
+            print(e, task, post)
