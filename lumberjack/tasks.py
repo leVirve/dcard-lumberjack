@@ -49,4 +49,5 @@ def collect_posts_task(forum):
             db.save(post)
             db.finish_pending_meta(forum, task)
         except Exception as e:
-            print(e, task, post)
+            logger.error('when fectch and save post', exc_info=True)
+            logger.error(e, task, post)

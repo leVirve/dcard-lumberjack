@@ -1,4 +1,6 @@
 import logging
+import logging.config
+import yaml
 import datetime
 
 from dcard import Dcard
@@ -6,17 +8,12 @@ from lumberjack.tasks import (
     collect_meta_task, collect_all_metas_task, collect_posts_task)
 
 
+with open('logger.yaml', 'rt') as f:
+    config = yaml.load(f.read())
+logging.config.dictConfig(config)
+
+
 logger = logging.getLogger('lumberjack')
-
-# Setup Handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-console = logging.StreamHandler()
-console.setLevel(logging.DEBUG)
-console.setFormatter(formatter)
-
-# Setup Logger
-logger.addHandler(console)
-logger.setLevel(logging.DEBUG)
 
 
 dcard = Dcard()
@@ -44,8 +41,8 @@ def get_new_posts(forum_name):
 if __name__ == '__main__':
     forum = 'pokemon'
 
-    result = update_metas_recently(forum)
-    print(result.get())
+    # result = update_metas_recently(forum)
+    # print(result.get())
 
     r2 = get_new_posts(forum)
     print(r2)
